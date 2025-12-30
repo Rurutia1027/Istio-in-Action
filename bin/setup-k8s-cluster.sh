@@ -13,8 +13,8 @@ PROM_URL="http://prometheus-server.${METRICS_NAMESPACE}.svc.cluster.local"
 JAEGER_URL="http://jaeger-query.${METRICS_NAMESPACE}.svc.cluster.local"
 
 # Helm values paths
-PROM_VALUES="helm/prometheus-values.yaml"
-GRAFANA_VALUES="helm/grafana-values.yaml"
+PROM_VALUES="config/prometheus-values.yaml"
+GRAFANA_VALUES="config/grafana-values.yaml"
 
 # -----------------------------
 # Create Kind Cluster
