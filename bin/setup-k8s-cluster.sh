@@ -88,6 +88,9 @@ helm install kiali-server kiali/kiali-server \
   --set external_services.tracing.provider=jaeger \
   --set external_services.tracing.url="$JAEGER_URL"
 
+
+
+
 # -----------------------------
 # Wait for all pods
 # -----------------------------
