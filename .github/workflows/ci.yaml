@@ -66,6 +66,14 @@ jobs:
             istioctl version
             istioctl install -y -f bookinfo/demo-profile-no-gateways.yaml
 
+      - name: Setup Istio Sample Bookinfo Services
+        run: |
+            chmod +x ./bin/setup-bookinfo.sh
+            ./bin/setup-bookinfo.sh
+            echo "Waiting for all Bookinfo pods to be Ready..."
+            kubectl wait --for=condition=Ready pods --all -n default --timeout=180s
+            kubectl get pods -A
+
       - name: Shutdown K8s Cluster
         run: |
           chmod +x ./bin/shutdown-k8s-cluster.sh
