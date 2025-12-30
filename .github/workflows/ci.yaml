@@ -1,0 +1,59 @@
+name: K8s Cluster Setup & Deploy Istio Stach CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  setup-k8s-cluster:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl tar
+          # Install Docker (if not preinstalled)
+          if ! command -v docker &> /dev/null; then
+            sudo apt-get install -y docker.io
+            sudo systemctl start docker
+            sudo systemctl enable docker
+          fi
+          # Install Kind
+          if ! command -v kind &> /dev/null; then
+            curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.22.0/kind-linux-amd64
+            chmod +x ./kind
+            sudo mv ./kind /usr/local/bin/kind
+          fi
+          # Install kubectl
+          if ! command -v kubectl &> /dev/null; then
+            curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+            chmod +x kubectl
+            sudo mv kubectl /usr/local/bin/
+          fi
+
+      - name: Run K8s Cluster Setup Script
+        run: |
+          chmod +x ./bin/setup-k8s-cluster.sh
+          ./bin/setup-k8s-cluster.sh
+
+      - name: Wait for 30 seconds
+        run: sleep 30
+
+      - name: Check all Pods are Ready
+        run: |
+          kubectl get pods --all-namespaces
+          NOT_READY=$(kubectl get pods --all-namespaces --field-selector=status.phase!=Running | wc -l)
+          if [ "$NOT_READY" -gt 0 ]; then
+            echo "Error: Some pods are not ready!"
+            exit 1
+          fi
+          echo "All pods are running."
