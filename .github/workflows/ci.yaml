@@ -48,11 +48,6 @@ jobs:
       - name: Wait for 30 seconds
         run: sleep 30
 
-      - name: Setup Istio Sample Bookinfo Services
-        run: |
-            chmod +x ./bin/setup-bookinfo.sh
-            ./bin/setup-bookinfo.sh
-
       - name: Check all Pods are Ready
         run: |
             kubectl get pods --all-namespaces
@@ -70,6 +65,12 @@ jobs:
             export PATH=$PWD/istio-$ISTIO_VERSION/bin:$PATH
             istioctl version
             istioctl install -y -f bookinfo/demo-profile-no-gateways.yaml
+
+      - name: Setup Istio Sample Bookinfo Services
+        run: |
+            chmod +x ./bin/setup-bookinfo.sh
+            ./bin/setup-bookinfo.sh
+            kubectl get pods -A
 
       - name: Shutdown K8s Cluster
         run: |
