@@ -50,10 +50,23 @@ jobs:
 
       - name: Check all Pods are Ready
         run: |
-          kubectl get pods --all-namespaces
-          NOT_READY=$(kubectl get pods --all-namespaces --field-selector=status.phase!=Running | wc -l)
-          if [ "$NOT_READY" -gt 0 ]; then
-            echo "Error: Some pods are not ready!"
-            exit 1
-          fi
-          echo "All pods are running."
+            kubectl get pods --all-namespaces
+            NOT_READY=$(kubectl get pods --all-namespaces --field-selector=status.phase!=Running | wc -l)
+            if [ "$NOT_READY" -gt 0 ]; then
+                echo "Error: Some pods are not ready!"
+                exit 1
+            fi
+            echo "All pods are running."
+
+      - name: Download istioctl and Install Operator
+        run: |
+            ISTIO_VERSION=1.28.2
+            curl -L https://istio.io/downloadIstio | ISTIO_VERSION=$ISTIO_VERSION sh -
+            export PATH=$PWD/istio-$ISTIO_VERSION/bin:$PATH
+            istioctl version
+            istioctl install -y -f bookinfo/demo-profile-no-gateways.yaml
+
+      - name: Shutdown K8s Cluster
+        run: |
+          chmod +x ./bin/shutdown-k8s-cluster.sh
+          ./bin/shutdown-k8s-cluster.sh
