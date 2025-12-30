@@ -1,4 +1,4 @@
-# Istio in Action 
+# Istio in Action | [![K8s Cluster Setup & Deploy Istio Stach CI](https://github.com/Rurutia1027/Istio-in-Action/actions/workflows/ci.yaml/badge.svg)](https://github.com/Rurutia1027/Istio-in-Action/actions/workflows/ci.yaml)
 
 ## Overview 
 This repository demostrates **production-oriented Istio usage patterns** on Kubernetes, starting from official Istio examples (BookInfo) and evolving toward **enterprise-grade traffic management**, **security**, **observability**, **automation**, and **GitOps**.
