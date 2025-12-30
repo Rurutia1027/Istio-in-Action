@@ -65,6 +65,8 @@ jobs:
             export PATH=$PWD/istio-$ISTIO_VERSION/bin:$PATH
             istioctl version
             istioctl install -y -f bookinfo/demo-profile-no-gateways.yaml
+            echo "Waiting for all Bookinfo pods to be Ready..."
+            kubectl wait --for=condition=Ready pods --all -n default --timeout=180s
 
       - name: Setup Istio Sample Bookinfo Services
         run: |
