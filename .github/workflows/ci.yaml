@@ -58,7 +58,7 @@ jobs:
             fi
             echo "All pods are running."
 
-      - name: Download istioctl
+      - name: Download istioctl and Install Operator
         run: |
             ISTIO_VERSION=1.28.2
             curl -L https://istio.io/downloadIstio | ISTIO_VERSION=$ISTIO_VERSION sh -
