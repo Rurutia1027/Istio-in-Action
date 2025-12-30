@@ -64,9 +64,6 @@ jobs:
             curl -L https://istio.io/downloadIstio | ISTIO_VERSION=$ISTIO_VERSION sh -
             export PATH=$PWD/istio-$ISTIO_VERSION/bin:$PATH
             istioctl version
-
-      - name: Install Istio with demo profile
-        run: |
             istioctl install -y -f bookinfo/demo-profile-no-gateways.yaml
 
       - name: Shutdown K8s Cluster
