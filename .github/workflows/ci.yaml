@@ -56,7 +56,7 @@ jobs:
                 echo "Error: Some pods are not ready!"
                 exit 1
             fi
-            echo "All pods are running."
+            echo "All pods are running."            
 
       - name: Download istioctl and Install Istio CRDs
         run: |
@@ -71,6 +71,25 @@ jobs:
         run: |
           bash scenarios/00-prerequisites/install-gateway-api-crds.sh
           bash scenarios/00-prerequisites/validate-gateway-api-crds.sh
+
+      - name: Setup Base Bookinfo 
+        run: |
+            kubectl apply -f scenarios/01-base-bookinfo/namespace.yaml
+            kubectl apply -f scenarios/01-base-bookinfo/details.yaml 
+            kubectl apply -f scenarios/01-base-bookinfo/productpage.yaml 
+            kubectl apply -f scenarios/01-base-bookinfo/ratings.yaml 
+            kubectl apply -f scenarios/01-base-bookinfo/reviews.yaml 
+
+      - name: Wait for 30 seconds and Then Validate base bookinfo setup
+        run: |
+            sleep 30
+            kubectl get pods -n bookinfo-base -l scenario=01-base-bookinfo
+            kubectl get svc -n bookinfo-base -l scenario=01-base-bookinfo
+
+      - name: Delete All Resource in Scenario 01 and Validate 
+        run: |
+          kubectl delete namespace bookinfo-base 
+          kubectl get all -n bookinfo-base 
 
       - name: Shutdown K8s Cluster
         run: |
