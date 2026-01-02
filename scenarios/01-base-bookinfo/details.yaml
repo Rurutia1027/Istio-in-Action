@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: details-v1
+  namespace: bookinfo-base
+  labels: 
+    app: details
+    scenario: "01-base-bookinfo"
+spec: 
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: details
+      scenario: "01-base-bookinfo" 
+      version: v1 
+  template: 
+    metadata:
+      labels: 
+      app: details 
+      scenario: "01-base-bookinfo"
+      version: v1
+    spec:
+      containers: 
+      - name: details
+        image: docker.io/istio/examples-bookinfo-details-v1:1.20.3
+        ports: 
+        - containerPort: 9080
+--- 
+apiVersion: v1
+kind: Service
+metadata: 
+    name: details 
+    namespace: bookinfo-base
+    labels: 
+      app: details
+      scenario: "01-base-bookinfo"
+spec: 
+  ports: 
+  - port: 9080
+    name: http 
+  selector: 
+    app: details 
+    scenario: "01-base-bookinfo"
+    

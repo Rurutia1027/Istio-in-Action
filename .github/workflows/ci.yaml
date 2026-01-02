@@ -58,6 +58,15 @@ jobs:
             fi
             echo "All pods are running."
 
+      - name: Setup Base Bookinfo 
+        run: |
+            kubectl apply -f scenarios/01-base-bookinfo/ 
+
+      - name: Wait for 30 seconds and Then Validate base bookinfo setup
+        run: |
+            sleep 30
+            kubectl get pods -n bookinfo-base -l scenario=01-base-bookinfo
+
       - name: Download istioctl and Install Istio CRDs
         run: |
             ISTIO_VERSION=1.28.2
