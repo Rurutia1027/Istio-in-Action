@@ -9,7 +9,10 @@
 Typical files: 
 ```
 install-istio-crds.sh
+validate-istio-crds.sh
+
 install-gateway-api-crds.sh
+validate-gateway-api-crds.sh
 ```
 
 **Resources used**:
