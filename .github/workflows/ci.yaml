@@ -75,7 +75,10 @@ jobs:
       - name: Setup Base Bookinfo 
         run: |
             kubectl apply -f scenarios/01-base-bookinfo/namespace.yaml
-            kubectl apply -f scenarios/01-base-bookinfo/ --recursive --ignore-not-found
+            kubectl apply -f scenarios/01-base-bookinfo/details.yaml 
+            kubectl apply -f scenarios/01-base-bookinfo/productpage.yaml 
+            kubectl apply -f scenarios/01-base-bookinfo/ratings.yaml 
+            kubectl apply -f scenarios/01-base-bookinfo/reviews.yaml 
 
       - name: Wait for 30 seconds and Then Validate base bookinfo setup
         run: |
