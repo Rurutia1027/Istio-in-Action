@@ -64,6 +64,8 @@ jobs:
             curl -L https://istio.io/downloadIstio | ISTIO_VERSION=$ISTIO_VERSION sh -
             export PATH=$PWD/istio-$ISTIO_VERSION/bin:$PATH
             istioctl version
+            bash 00-prerequisites/install-istio-crds.sh
+            bash 00-prerequisites/validate-istio-crds.sh
 
       - name: Shutdown K8s Cluster
         run: |
