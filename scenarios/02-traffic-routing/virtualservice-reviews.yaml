@@ -1,0 +1,16 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: reviews 
+  namespace: traffic-routing
+  labels:
+    scenario: "02-traffic-routing"
+spec: 
+  hosts:
+  - reviews 
+  http: 
+  - route:
+    - destination: 
+        host: reviews
+        subsets: 1
+      weight: 100
