@@ -58,13 +58,12 @@ jobs:
             fi
             echo "All pods are running."
 
-      - name: Download istioctl and Install Operator
+      - name: Download istioctl and Install Operators
         run: |
             ISTIO_VERSION=1.28.2
             curl -L https://istio.io/downloadIstio | ISTIO_VERSION=$ISTIO_VERSION sh -
             export PATH=$PWD/istio-$ISTIO_VERSION/bin:$PATH
             istioctl version
-            istioctl install -y -f bookinfo/demo-profile-no-gateways.yaml
 
       - name: Shutdown K8s Cluster
         run: |
