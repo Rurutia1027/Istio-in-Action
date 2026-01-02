@@ -58,21 +58,19 @@ jobs:
             fi
             echo "All pods are running."
 
-      - name: Download istioctl and Install Operator
+      - name: Download istioctl and Install Istio CRDs
         run: |
             ISTIO_VERSION=1.28.2
             curl -L https://istio.io/downloadIstio | ISTIO_VERSION=$ISTIO_VERSION sh -
             export PATH=$PWD/istio-$ISTIO_VERSION/bin:$PATH
             istioctl version
-            istioctl install -y -f bookinfo/demo-profile-no-gateways.yaml
+            bash 00-prerequisites/install-istio-crds.sh
+            bash 00-prerequisites/validate-istio-crds.sh
 
-      - name: Setup Istio Sample Bookinfo Services
+      - name: Install Gateway CRDs and Validate Gateway CRDs
         run: |
-            chmod +x ./bin/setup-bookinfo.sh
-            ./bin/setup-bookinfo.sh
-            echo "Waiting for all Bookinfo pods to be Ready..."
-            kubectl wait --for=condition=Ready pods --all -n default --timeout=180s
-            kubectl get pods -A
+          bash 00-prerequisites/install-gateway-api-crds.sh
+          bash 00-prerequisites/validate-gateway-api-crds.sh
 
       - name: Shutdown K8s Cluster
         run: |
