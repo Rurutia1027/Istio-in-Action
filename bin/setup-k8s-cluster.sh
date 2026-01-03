@@ -65,7 +65,7 @@ helm upgrade --install loki grafana/loki-stack -n "$METRICS_NAMESPACE"
 # -----------------------------
 # Install Istio Core
 # -----------------------------
-helm install istio-base istio/base -n "$ISTIO_NAMESPACE"
+helm install istio-base istio/base -n "$ISTIO_NAMESPACE" --create-namespace
 helm install istiod istio/istiod -n "$ISTIO_NAMESPACE" --set telemetry.enabled=true
 helm install istio-ingress istio/gateway -n "$ISTIO_NAMESPACE"
 

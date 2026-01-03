@@ -64,7 +64,7 @@ jobs:
             curl -L https://istio.io/downloadIstio | ISTIO_VERSION=$ISTIO_VERSION sh -
             export PATH=$PWD/istio-$ISTIO_VERSION/bin:$PATH
             istioctl version
-            bash scenarios/00-prerequisites/install-istio-crds.sh
+            sleep 20
             bash scenarios/00-prerequisites/validate-istio-crds.sh
 
       - name: Install Gateway CRDs and Validate Gateway CRDs
