@@ -6,11 +6,11 @@ set -euo pipefail
 # -----------------------------
 CLUSTER_NAME="istio-demo"
 K8S_CONFIG_FILE="config/kind-config.yaml"
-METRICS_NAMESPACE="metrics"
 ISTIO_NAMESPACE="istio-system"
 
-PROM_URL="http://prometheus-server.${METRICS_NAMESPACE}.svc.cluster.local"
-JAEGER_URL="http://jaeger-query.${METRICS_NAMESPACE}.svc.cluster.local"
+PROM_URL="http://prometheus-server.${ISTIO_NAMESPACE}.svc.cluster.local"
+JAEGER_URL="http://jaeger-query.${ISTIO_NAMESPACE}.svc.cluster.local"
+GRAFANA_URL="http://grafana.istio-system.svc.cluster.local:3000"
 
 # Helm values paths
 PROM_VALUES="config/prometheus-values.yaml"
@@ -35,7 +35,6 @@ kubectl get pods -A
 # -----------------------------
 # Namespaces
 # -----------------------------
-kubectl create namespace "$METRICS_NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
 kubectl create namespace "$ISTIO_NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
 
 # -----------------------------
@@ -53,19 +52,19 @@ helm repo update
 # Install Prometheus + Grafana + Loki
 # -----------------------------
 helm upgrade --install prometheus prometheus-community/prometheus \
-  -n "$METRICS_NAMESPACE" \
+  -n "$ISTIO_NAMESPACE" \
   -f "$PROM_VALUES"
 
 helm upgrade --install grafana grafana/grafana \
-  -n "$METRICS_NAMESPACE" \
+  -n "$ISTIO_NAMESPACE" \
   -f "$GRAFANA_VALUES"
 
-helm upgrade --install loki grafana/loki-stack -n "$METRICS_NAMESPACE"
+helm upgrade --install loki grafana/loki-stack -n "$ISTIO_NAMESPACE"
 
 # -----------------------------
 # Install Istio Core
 # -----------------------------
-helm install istio-base istio/base -n "$ISTIO_NAMESPACE"
+helm install istio-base istio/base -n "$ISTIO_NAMESPACE" --create-namespace
 helm install istiod istio/istiod -n "$ISTIO_NAMESPACE" --set telemetry.enabled=true
 helm install istio-ingress istio/gateway -n "$ISTIO_NAMESPACE"
 
@@ -73,7 +72,7 @@ helm install istio-ingress istio/gateway -n "$ISTIO_NAMESPACE"
 # Install Jaeger
 # -----------------------------
 helm install jaeger jaegertracing/jaeger \
-  -n "$METRICS_NAMESPACE" \
+  -n "$ISTIO_NAMESPACE" \
   --set provisionDataStore.cassandra=false \
   --set storage.type=memory
 
@@ -86,15 +85,12 @@ helm install kiali-server kiali/kiali-server \
   --set external_services.prometheus.url="$PROM_URL" \
   --set external_services.tracing.enabled=true \
   --set external_services.tracing.provider=jaeger \
-  --set external_services.tracing.url="$JAEGER_URL"
-
-
-
+  --set external_services.tracing.url="$JAEGER_URL" \
+  --set external_services.grafana.url="$GRAFANA_URL"
 
 # -----------------------------
 # Wait for all pods
 # -----------------------------
-kubectl wait --for=condition=Ready pods --all -n "$METRICS_NAMESPACE" --timeout=300s
 kubectl wait --for=condition=Ready pods --all -n "$ISTIO_NAMESPACE" --timeout=300s
 
 # -----------------------------
@@ -102,8 +98,8 @@ kubectl wait --for=condition=Ready pods --all -n "$ISTIO_NAMESPACE" --timeout=30
 # -----------------------------
 echo "====================================================="
 echo "[INFO] Setup complete!"
-echo "[INFO] Prometheus: kubectl port-forward -n $METRICS_NAMESPACE svc/prometheus 9090:9090"
-echo "[INFO] Grafana: kubectl port-forward -n $METRICS_NAMESPACE svc/grafana 3000:3000"
-echo "[INFO] Jaeger: kubectl port-forward -n $METRICS_NAMESPACE svc/jaeger-query 16686:16686"
+echo "[INFO] Prometheus: kubectl port-forward -n $ISTIO_NAMESPACE svc/prometheus 9090:9090"
+echo "[INFO] Grafana: kubectl port-forward -n $ISTIO_NAMESPACE svc/grafana 3000:3000"
+echo "[INFO] Jaeger: kubectl port-forward -n $ISTIO_NAMESPACE svc/jaeger-query 16686:16686"
 echo "[INFO] Kiali: kubectl port-forward -n $ISTIO_NAMESPACE svc/kiali 20001:20001"
 echo "====================================================="
