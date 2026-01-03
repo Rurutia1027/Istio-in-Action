@@ -1,0 +1,21 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: reviews-route-by-user
+  namespace: 02-traffic-routing
+spec: 
+  hosts: 
+  - reviews
+  http: 
+  - match: 
+    - headers: 
+        end-user: 
+          exact: jason 
+    route: 
+    - destination:
+        host: reviews 
+        subset: v3 
+  - route: 
+    - destination: 
+        host: reviews
+        subset: v1 

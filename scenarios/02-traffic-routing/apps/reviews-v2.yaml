@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reviews-v2
+  namespace: 02-traffic-routing
+  labels:
+    app: reviews
+    version: v2
+    scenario: "02-traffic-routing"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reviews
+      version: v2
+      scenario: "02-traffic-routing"
+  template:
+    metadata:
+      labels:
+        app: reviews
+        version: v2
+        scenario: "02-traffic-routing"
+    spec:
+      containers:
+        - name: reviews
+          image: docker.io/istio/examples-bookinfo-reviews-v2:1.20.3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9080
