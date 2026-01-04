@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: productpage-v1
+  namespace: 03-canary-deployment
+  labels:
+    app: productpage
+    scenario: 03-canary-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: productpage
+      scenario: 03-canary-deployment
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: productpage
+        scenario: 03-canary-deployment
+        version: v1
+    spec:
+      containers:
+      - name: productpage
+        image: docker.io/istio/examples-bookinfo-productpage-v1:1.20.3
+        ports:
+        - containerPort: 9080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: productpage
+  namespace: 03-canary-deployment
+  labels:
+    app: productpage
+    scenario: 03-canary-deployment
+spec:
+  ports:
+  - port: 9080
+    name: http
+  selector:
+    app: productpage
+    scenario: 03-canary-deployment

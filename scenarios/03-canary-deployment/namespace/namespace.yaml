@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: 03-canary-deployment
+  labels: 
+    istio-injection: enabled 
+    scenario: 03-canary-deployment
