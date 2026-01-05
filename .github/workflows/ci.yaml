@@ -41,26 +41,23 @@ jobs:
           fi
 
       - name: 01 - Create K8s Cluster
-        run: |
-          chmod + x ./bin/01-k8s-cluster.sh
+        run: |         
           bash ./bin/01-k8s-cluster.sh
 
       - name: 02 - Create Namespaces
-        run: |
-          chmod + x ./bin/02-namespaces.sh
+        run: |         
           bash ./bin/02-namespaces.sh
 
       - name: 03 - Add Helm Repos
-        run: |
-          chmod + x ./bin/03-helm-repos.sh
+        run: |          
           bash ./bin/03-helm-repos.sh
 
       - name: 04 - Install Observability Stack
-        run: ./bin/04-observability.sh
+        run: |
+          bash ./bin/04-observability.sh
 
       - name: 05 - Install Istio
         run: |
-          chmod + x ./bin/05-istio.sh
           bash ./bin/05-istio.sh
 
       - name: Wait for Istio Pods Ready
@@ -68,7 +65,6 @@ jobs:
 
       - name: 07 - Install Kiali
         run: |
-          chmod + x ./bin/07-kiali.sh
           bash ./bin/07-kiali.sh
 
       - name: Validate all Pods Ready
