@@ -59,6 +59,8 @@ jobs:
       - name: 05 - Install Istio
         run: |
           bash ./bin/05-istio.sh
+          # validate all istio crds 
+          bash scenarios/00-prerequisites/validate-istio-crds.sh
 
       - name: Wait for Istio Pods Ready
         run: kubectl wait --for=condition=Ready pods --all -n istio-system --timeout=300s
@@ -67,28 +69,26 @@ jobs:
         run: |
           bash ./bin/07-kiali.sh
 
-      - name: Validate all Pods Ready
-        run: |
-          NOT_READY=$(kubectl get pods --all-namespaces --field-selector=status.phase!=Running --no-headers | wc -l)
-          if [ "$NOT_READY" -gt 0 ]; then
-              echo "Error: Some pods are not ready!"
-              exit 1
-          fi
-          echo "All pods are running."  
-
-      - name: Download istioctl and Install Istio CRDs
-        run: |
-            ISTIO_VERSION=1.28.2
-            curl -L https://istio.io/downloadIstio | ISTIO_VERSION=$ISTIO_VERSION sh -
-            export PATH=$PWD/istio-$ISTIO_VERSION/bin:$PATH
-            istioctl version
-            sleep 20
-            bash scenarios/00-prerequisites/validate-istio-crds.sh
-
       - name: Install Gateway CRDs and Validate Gateway CRDs
         run: |
           bash scenarios/00-prerequisites/install-gateway-api-crds.sh
           bash scenarios/00-prerequisites/validate-gateway-api-crds.sh
+
+      - name: Validate all Pods Ready
+        run: |
+          for ns in istio-system cattle-system monitoring; do
+            echo "Waiting for pods in namespace $ns..."
+            kubectl wait --for=condition=Ready pods --all -n $ns --timeout=300s || true
+          done
+          
+          NOT_READY=$(kubectl get pods --all-namespaces --no-headers | awk '$4 != "Running" && $4 != "Completed" {print $0}')
+          if [ -n "$NOT_READY" ]; then
+              echo "Error: Some pods are not ready!"
+              echo "$NOT_READY"
+              exit 1
+          fi
+
+          echo "All pods are running."
 
       - name: Shutdown K8s Cluster
         run: |
