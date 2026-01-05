@@ -1,0 +1,40 @@
+{
+  "spec": {
+    "rules": [
+      {
+        "backendRefs": [
+          {
+            "name": "ratings",
+            "port": 9080,
+            "weight": 0,
+            "filters": [
+              {
+                "type": "ExtensionRef",
+                "extensionRef": {
+                  "group": "networking.istio.io",
+                  "kind": "Subset",
+                  "name": "v1"
+                }
+              }
+            ]
+          },
+          {
+            "name": "ratings",
+            "port": 9080,
+            "weight": 100,
+            "filters": [
+              {
+                "type": "ExtensionRef",
+                "extensionRef": {
+                  "group": "networking.istio.io",
+                  "kind": "Subset",
+                  "name": "v2"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
