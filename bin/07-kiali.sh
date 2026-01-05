@@ -8,6 +8,6 @@ helm upgrade --install kiali-server kiali/kiali-server \
   --set auth.strategy=anonymous \
   --set external_services.prometheus.url="$PROM_URL" \
   --set external_services.tracing.enabled=true \
+  --set external_services.grafana.url="$GRAFANA_URL"
   # --set external_services.tracing.provider=jaeger \
   # --set external_services.tracing.url="$JAEGER_URL" \
-  --set external_services.grafana.url="$GRAFANA_URL"
