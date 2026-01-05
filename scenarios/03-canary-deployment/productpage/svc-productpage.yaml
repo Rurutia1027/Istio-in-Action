@@ -1,0 +1,19 @@
+##################################################################################################
+# Productpage services
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: productpage
+  namespace: 03-canary-deployment
+  labels:
+    app: productpage
+    service: productpage
+spec:
+  type: NodePort
+  ports:
+  - port: 9080
+    name: http
+  selector:
+    app: productpage
+---
