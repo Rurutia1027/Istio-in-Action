@@ -5,8 +5,15 @@ metadata:
   namespace: 03-canary-deployment
 spec:
   parentRefs:
-    - name: bookinfo-gateway   # bind http route to Gateway
+    - name: bookinfo-gateway
   rules:
     - backendRefs:
-        - name: ratings         # lead traffic to Service
+        - name: ratings
           port: 9080
+          weight: 100
+          filters:
+            - type: ExtensionRef
+              extensionRef:
+                group: networking.istio.io
+                kind: Subset
+                name: v1
