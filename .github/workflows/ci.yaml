@@ -40,58 +40,57 @@ jobs:
             sudo mv kubectl /usr/local/bin/
           fi
 
-      - name: Run K8s Cluster Setup Script
-        run: |
-          chmod +x ./bin/setup-k8s-cluster.sh
-          ./bin/setup-k8s-cluster.sh
+      - name: 01 - Create K8s Cluster
+        run: |         
+          bash ./bin/01-k8s-cluster.sh
 
-      - name: Wait for 30 seconds
-        run: sleep 30
+      - name: 02 - Create Namespaces
+        run: |         
+          bash ./bin/02-namespaces.sh
 
-      - name: Check all Pods are Ready
-        run: |
-            kubectl get pods --all-namespaces
-            NOT_READY=$(kubectl get pods --all-namespaces --field-selector=status.phase!=Running | wc -l)
-            if [ "$NOT_READY" -gt 0 ]; then
-                echo "Error: Some pods are not ready!"
-                exit 1
-            fi
-            echo "All pods are running."            
+      - name: 03 - Add Helm Repos
+        run: |          
+          bash ./bin/03-helm-repos.sh
 
-      - name: Download istioctl and Install Istio CRDs
+      - name: 04 - Install Observability Stack
         run: |
-            ISTIO_VERSION=1.28.2
-            curl -L https://istio.io/downloadIstio | ISTIO_VERSION=$ISTIO_VERSION sh -
-            export PATH=$PWD/istio-$ISTIO_VERSION/bin:$PATH
-            istioctl version
-            sleep 20
-            bash scenarios/00-prerequisites/validate-istio-crds.sh
+          bash ./bin/04-observability.sh
+
+      - name: 05 - Install Istio
+        run: |
+          bash ./bin/05-istio.sh
+          # validate all istio crds 
+          bash scenarios/00-prerequisites/validate-istio-crds.sh
+
+      - name: Wait for Istio Pods Ready
+        run: kubectl wait --for=condition=Ready pods --all -n istio-system --timeout=300s
+
+      - name: 07 - Install Kiali
+        run: |
+          bash ./bin/07-kiali.sh
 
       - name: Install Gateway CRDs and Validate Gateway CRDs
         run: |
           bash scenarios/00-prerequisites/install-gateway-api-crds.sh
           bash scenarios/00-prerequisites/validate-gateway-api-crds.sh
 
-      - name: Setup Base Bookinfo 
+      - name: Validate all Pods Ready
         run: |
-            kubectl apply -f scenarios/01-base-bookinfo/namespace.yaml
-            kubectl apply -f scenarios/01-base-bookinfo/details.yaml 
-            kubectl apply -f scenarios/01-base-bookinfo/productpage.yaml 
-            kubectl apply -f scenarios/01-base-bookinfo/ratings.yaml 
-            kubectl apply -f scenarios/01-base-bookinfo/reviews.yaml 
+          for ns in istio-system cattle-system monitoring; do
+            echo "Waiting for pods in namespace $ns..."
+            kubectl wait --for=condition=Ready pods --all -n $ns --timeout=300s || true
+          done
+          
+          NOT_READY=$(kubectl get pods --all-namespaces --no-headers | awk '$4 != "Running" && $4 != "Completed" {print $0}')
+          if [ -n "$NOT_READY" ]; then
+              echo "Error: Some pods are not ready!"
+              echo "$NOT_READY"
+              exit 1
+          fi
 
-      - name: Wait for 30 seconds and Then Validate base bookinfo setup
-        run: |
-            sleep 30
-            kubectl get pods -n bookinfo-base -l scenario=01-base-bookinfo
-            kubectl get svc -n bookinfo-base -l scenario=01-base-bookinfo
-
-      - name: Delete All Resource in Scenario 01 and Validate 
-        run: |
-          kubectl delete namespace bookinfo-base 
-          kubectl get all -n bookinfo-base 
+          echo "All pods are running."
 
       - name: Shutdown K8s Cluster
         run: |
-          chmod +x ./bin/shutdown-k8s-cluster.sh
-          ./bin/shutdown-k8s-cluster.sh
+          chmod +x ./bin/shutdown.sh
+          ./bin/shutdown.sh

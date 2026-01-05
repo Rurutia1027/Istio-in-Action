@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: details-v2
+  namespace: 03-canary-deployment
   labels:
     app: details
     version: v2

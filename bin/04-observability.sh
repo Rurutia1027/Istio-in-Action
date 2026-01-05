@@ -14,6 +14,6 @@ helm upgrade --install grafana grafana/grafana \
   -n "$ISTIO_NAMESPACE" \
   -f "$GRAFANA_VALUES"
 
-log "Installing Loki"
-helm upgrade --install loki grafana/loki-stack \
-  -n "$ISTIO_NAMESPACE"  
+# log "Installing Loki"
+# helm upgrade --install loki grafana/loki-stack \
+#   -n "$ISTIO_NAMESPACE"  

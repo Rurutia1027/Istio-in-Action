@@ -4,3 +4,4 @@ metadata:
   name: 03-canary-deployment
   labels: 
     scenario: 03-canary-deployment
+    istio-injection: enabled
