@@ -40,23 +40,45 @@ jobs:
             sudo mv kubectl /usr/local/bin/
           fi
 
-      - name: Run K8s Cluster Setup Script
+      - name: 01 - Create K8s Cluster
         run: |
-          chmod +x ./bin/setup.sh
-          ./bin/setup.sh
+          chmod + x ./bin/01-k8s-cluster.sh
+          bash ./bin/01-k8s-cluster.sh
 
-      - name: Wait for 30 seconds
-        run: sleep 30
-
-      - name: Check all Pods are Ready
+      - name: 02 - Create Namespaces
         run: |
-            kubectl get pods --all-namespaces
-            NOT_READY=$(kubectl get pods --all-namespaces --field-selector=status.phase!=Running | wc -l)
-            if [ "$NOT_READY" -gt 0 ]; then
-                echo "Error: Some pods are not ready!"
-                exit 1
-            fi
-            echo "All pods are running."            
+          chmod + x ./bin/02-namespaces.sh
+          bash ./bin/02-namespaces.sh
+
+      - name: 03 - Add Helm Repos
+        run: |
+          chmod + x ./bin/03-helm-repos.sh
+          bash ./bin/03-helm-repos.sh
+
+      - name: 04 - Install Observability Stack
+        run: ./bin/04-observability.sh
+
+      - name: 05 - Install Istio
+        run: |
+          chmod + x ./bin/05-istio.sh
+          bash ./bin/05-istio.sh
+
+      - name: Wait for Istio Pods Ready
+        run: kubectl wait --for=condition=Ready pods --all -n istio-system --timeout=300s
+
+      - name: 07 - Install Kiali
+        run: |
+          chmod + x ./bin/07-kiali.sh
+          bash ./bin/07-kiali.sh
+
+      - name: Validate all Pods Ready
+        run: |
+          NOT_READY=$(kubectl get pods --all-namespaces --field-selector=status.phase!=Running --no-headers | wc -l)
+          if [ "$NOT_READY" -gt 0 ]; then
+              echo "Error: Some pods are not ready!"
+              exit 1
+          fi
+          echo "All pods are running."  
 
       - name: Download istioctl and Install Istio CRDs
         run: |
@@ -74,5 +96,5 @@ jobs:
 
       - name: Shutdown K8s Cluster
         run: |
-          chmod +x ./bin/shutdown-k8s-cluster.sh
-          ./bin/shutdown-k8s-cluster.sh
+          chmod +x ./bin/shutdown.sh
+          ./bin/shutdown.sh
