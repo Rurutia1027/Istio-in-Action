@@ -5,6 +5,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: details
+  namespace: 03-canary-deployment
   labels:
     app: details
     service: details
